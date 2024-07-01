@@ -2,7 +2,8 @@
 # Copyright © 2008-2017 Guillaume Ayoub
 # Copyright © 2008 Nicolas Kandel
 # Copyright © 2008 Pascal Halter
-# Copyright © 2017-2019 Unrud <unrud@outlook.com>
+# Copyright © 2017-2020 Unrud <unrud@outlook.com>
+# Copyright © 2024-2024 Peter Bieringer <pb@bieringer.de>
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,6 +27,7 @@ Use ``load()`` to obtain an instance of ``Configuration`` for use with
 """
 
 import contextlib
+import json
 import math
 import os
 import string
@@ -36,6 +38,7 @@ from typing import (Any, Callable, ClassVar, Iterable, List, Optional,
                     Sequence, Tuple, TypeVar, Union)
 
 from radicale import auth, hook, rights, storage, types, web
+from radicale.item import check_and_sanitize_props
 
 DEFAULT_CONFIG_PATH: str = os.pathsep.join([
     "?/etc/radicale/config",
@@ -99,6 +102,16 @@ def _convert_to_bool(value: Any) -> bool:
     if value.lower() not in RawConfigParser.BOOLEAN_STATES:
         raise ValueError("not a boolean: %r" % value)
     return RawConfigParser.BOOLEAN_STATES[value.lower()]
+
+
+def json_str(value: Any) -> dict:
+    if not value:
+        return {}
+    ret = json.loads(value)
+    for (name_coll, props) in ret.items():
+        checked_props = check_and_sanitize_props(props)
+        ret[name_coll] = checked_props
+    return ret
 
 
 INTERNAL_OPTIONS: Sequence[str] = ("_allow_extra",)
@@ -177,7 +190,11 @@ DEFAULT_CONFIG_SCHEMA: types.CONFIG_SCHEMA = OrderedDict([
         ("delay", {
             "value": "1",
             "help": "incorrect authentication delay",
-            "type": positive_float})])),
+            "type": positive_float}),
+        ("lc_username", {
+            "value": "False",
+            "help": "convert username to lowercase, must be true for case-insensitive auth providers",
+            "type": bool})])),
     ("rights", OrderedDict([
         ("type", {
             "value": "owner_only",
@@ -206,6 +223,10 @@ DEFAULT_CONFIG_SCHEMA: types.CONFIG_SCHEMA = OrderedDict([
             "value": "2592000",  # 30 days
             "help": "delete sync token that are older",
             "type": positive_int}),
+        ("skip_broken_item", {
+            "value": "True",
+            "help": "skip broken item instead of triggering exception",
+            "type": bool}),
         ("hook", {
             "value": "",
             "help": "command that is run after changes to storage",
@@ -213,7 +234,11 @@ DEFAULT_CONFIG_SCHEMA: types.CONFIG_SCHEMA = OrderedDict([
         ("_filesystem_fsync", {
             "value": "True",
             "help": "sync all changes to filesystem during requests",
-            "type": bool})])),
+            "type": bool}),
+        ("predefined_collections", {
+            "value": "",
+            "help": "predefined user collections",
+            "type": json_str})])),
     ("hook", OrderedDict([
         ("type", {
             "value": "none",
@@ -243,6 +268,26 @@ DEFAULT_CONFIG_SCHEMA: types.CONFIG_SCHEMA = OrderedDict([
             "value": "info",
             "help": "threshold for the logger",
             "type": logging_level}),
+        ("bad_put_request_content", {
+            "value": "False",
+            "help": "log bad PUT request content",
+            "type": bool}),
+        ("backtrace_on_debug", {
+            "value": "False",
+            "help": "log backtrace on level=debug",
+            "type": bool}),
+        ("request_header_on_debug", {
+            "value": "False",
+            "help": "log request header on level=debug",
+            "type": bool}),
+        ("request_content_on_debug", {
+            "value": "False",
+            "help": "log request content on level=debug",
+            "type": bool}),
+        ("response_content_on_debug", {
+            "value": "False",
+            "help": "log response content on level=debug",
+            "type": bool}),
         ("mask_passwords", {
             "value": "True",
             "help": "mask passwords in logs",

@@ -24,7 +24,14 @@ VERSION = "3.dev"
 with open("README.md", encoding="utf-8") as f:
     long_description = f.read()
 web_files = ["web/internal_data/css/icon.png",
+             "web/internal_data/css/loading.svg",
+             "web/internal_data/css/logo.svg",
              "web/internal_data/css/main.css",
+             "web/internal_data/css/icons/delete.svg",
+             "web/internal_data/css/icons/download.svg",
+             "web/internal_data/css/icons/edit.svg",
+             "web/internal_data/css/icons/new.svg",
+             "web/internal_data/css/icons/upload.svg",
              "web/internal_data/fn.js",
              "web/internal_data/index.html"]
 
@@ -33,8 +40,7 @@ install_requires = ["defusedxml", "passlib", "vobject>=0.9.6",
                     "pika>=1.1.0",
                     "setuptools; python_version<'3.9'"]
 bcrypt_requires = ["bcrypt"]
-# typeguard requires pytest<7
-test_requires = ["pytest<7", "typeguard<3", "waitress", *bcrypt_requires]
+test_requires = ["pytest>=7", "typeguard<4.3", "waitress", *bcrypt_requires]
 
 setup(
     name="Radicale",
@@ -54,7 +60,7 @@ setup(
     install_requires=install_requires,
     extras_require={"test": test_requires, "bcrypt": bcrypt_requires},
     keywords=["calendar", "addressbook", "CalDAV", "CardDAV"],
-    python_requires=">=3.7.0",
+    python_requires=">=3.8.0",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
@@ -64,7 +70,6 @@ setup(
         "License :: OSI Approved :: GNU General Public License (GPL)",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",

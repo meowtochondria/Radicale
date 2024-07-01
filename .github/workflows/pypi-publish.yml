@@ -5,10 +5,12 @@ on:
 
 jobs:
   publish:
+    permissions:
+      id-token: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: 3.x
       - name: Install Build dependencies
@@ -16,7 +18,4 @@ jobs:
       - name: Build
         run: python -m build --sdist --wheel
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@master
-        with:
-          user: __token__
-          password: ${{ secrets.pypi_password }}
+        uses: pypa/gh-action-pypi-publish@release/v1

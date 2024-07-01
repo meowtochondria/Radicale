@@ -1,6 +1,7 @@
 # This file is part of Radicale - CalDAV and CardDAV server
 # Copyright © 2011-2017 Guillaume Ayoub
-# Copyright © 2017-2019 Unrud <unrud@outlook.com>
+# Copyright © 2017-2023 Unrud <unrud@outlook.com>
+# Copyright © 2024-2024 Peter Bieringer <pb@bieringer.de>
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -215,17 +216,23 @@ def setup() -> None:
     register_stream = handler.register_stream
     log_record_factory = IdentLogRecordFactory(logging.getLogRecordFactory())
     logging.setLogRecordFactory(log_record_factory)
-    set_level(logging.WARNING)
+    set_level(logging.INFO, True)
     if format_name != sane_format_name:
         logger.error("Invalid RADICALE_LOG_FORMAT: %r", format_name)
 
 
-def set_level(level: Union[int, str]) -> None:
+def set_level(level: Union[int, str], backtrace_on_debug: bool) -> None:
     """Set logging level for global logger."""
     if isinstance(level, str):
         level = getattr(logging, level.upper())
         assert isinstance(level, int)
     logger.setLevel(level)
-    logger.removeFilter(REMOVE_TRACEBACK_FILTER)
     if level > logging.DEBUG:
+        logger.info("Logging of backtrace is disabled in this loglevel")
         logger.addFilter(REMOVE_TRACEBACK_FILTER)
+    else:
+        if not backtrace_on_debug:
+            logger.debug("Logging of backtrace is disabled by option in this loglevel")
+            logger.addFilter(REMOVE_TRACEBACK_FILTER)
+        else:
+            logger.removeFilter(REMOVE_TRACEBACK_FILTER)

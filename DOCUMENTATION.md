@@ -216,6 +216,8 @@ requirements.
 
 #### Linux with systemd system-wide
 
+Recommendation: check support by [Linux Distribution Packages](#linux-distribution-packages) instead of manual setup / initial configuration.
+
 Create the **radicale** user and group for the Radicale service. (Run
 `useradd --system --user-group --home-dir / --shell /sbin/nologin radicale` as root.)
 The storage folder must be writable by **radicale**. (Run
@@ -786,6 +788,13 @@ Message displayed in the client when a password is needed.
 
 Default: `Radicale - Password Required`
 
+##### lc_username
+
+Сonvert username to lowercase, must be true for case-insensitive auth 
+providers like ldap, kerberos
+
+Default: `False`
+
 #### rights
 
 ##### type
@@ -856,10 +865,36 @@ Delete sync-token that are older than the specified time. (seconds)
 
 Default: `2592000`
 
+#### skip_broken_item
+
+Skip broken item instead of triggering an exception
+
+Default: `True`
+
 ##### hook
 
 Command that is run after changes to storage. Take a look at the
 [Versioning with Git](#versioning-with-git) tutorial for an example.
+
+Default:
+
+##### predefined_collections
+
+Create predefined user collections
+
+ Example:
+
+     {
+       "def-addressbook": {
+          "D:displayname": "Personal Address Book",
+          "tag": "VADDRESSBOOK"
+       },
+       "def-calendar": {
+          "C:supported-calendar-component-set": "VEVENT,VJOURNAL,VTODO",
+          "D:displayname": "Personal Calendar",
+          "tag": "VCALENDAR"
+       }
+     }
 
 Default:
 
@@ -894,6 +929,36 @@ Default: `warning`
 Don't include passwords in logs.
 
 Default: `True`
+
+##### bad_put_request_content
+
+Log bad PUT request content (for further diagnostics)
+
+Default: `False`
+
+##### backtrace_on_debug
+
+Log backtrace on level=debug
+
+Default: `False`
+
+##### request_header_on_debug
+
+Log request on level=debug
+
+Default: `False`
+
+##### request_content_on_debug
+
+Log request on level=debug
+
+Default: `False`
+
+##### response_content_on_debug = True
+
+Log response on level=debug
+
+Default: `False`
 
 #### headers
 
@@ -971,15 +1036,20 @@ Enter the URL of the Radicale server (e.g. `http://localhost:5232`) and your
 username. DAVx⁵ will show all existing calendars and address books and you
 can create new.
 
-#### GNOME Calendar, Contacts and Evolution
+#### GNOME Calendar, Contacts
 
-**GNOME Calendar** and **Contacts** do not support adding WebDAV calendars
-and address books directly, but you can add them in **Evolution**.
+GNOME 46 added CalDAV and CardDAV support to _GNOME Online Accounts_.
+
+Open GNOME Settings, navigate to _Online Accounts_ > _Connect an Account_ > _Calendar, Contacts and Files_. Enter the URL (e.g. `https://example.com/radicale`) and your credentials then click _Sign In_. In the pop-up dialog, turn off _Files_. After adding Radicale in _GNOME Online Accounts_, it should be available in GNOME Contacts and GNOME Calendar.
+
+#### Evolution
 
 In **Evolution** add a new calendar and address book respectively with WebDAV.
 Enter the URL of the Radicale server (e.g. `http://localhost:5232`) and your
 username. Clicking on the search button will list the existing calendars and
 address books.
+
+Adding CalDAV and CardDAV accounts in Evolution will automatically make them available in GNOME Contacts and GNOME Calendar.
 
 #### Thunderbird
 
@@ -1066,6 +1136,8 @@ Delete the collections by running something like:
 ```bash
 curl -u user -X DELETE 'http://localhost:5232/user/calendar'
 ```
+
+Note: requires config/option `permit_delete_collection = True`
 
 ### Authentication and Rights
 
@@ -1497,7 +1569,7 @@ Radicale has been packaged for:
 * [Debian](http://packages.debian.org/radicale) by Jonas Smedegaard
 * [Gentoo](https://packages.gentoo.org/packages/www-apps/radicale)
   by René Neumann, Maxim Koltsov and Manuel Rüger
-* [Fedora/RHEL/CentOS](https://src.fedoraproject.org/rpms/radicale) by Jorti
+* [Fedora/EnterpriseLinux](https://src.fedoraproject.org/rpms/radicale) by Jorti
   and Peter Bieringer
 * [Mageia](http://madb.mageia.org/package/show/application/0/name/radicale)
   by Jani Välimaa
